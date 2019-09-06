@@ -11,28 +11,6 @@ app.use(bodyParser.json())
 morgan.token('body', function (req, res) { return JSON.stringify(req.body) });
 app.use(morgan(':method :url :status :response-time ms - :res[content-length] :body - :req[content-length]'));
  
-// let persons = [
-//   {
-//     "name": "Arto Hellas",
-//     "number": "040-123456",
-//     "id": 1
-//   },
-//   {
-//     "name": "Ada Lovelace",
-//     "number": "39-44-5323523",
-//     "id": 2
-//   },
-//   {
-//     "name": "Dan Abramov",
-//     "number": "12-43-234345",
-//     "id": 3
-//   },
-//   {
-//     "name": "Mary Poppendieck",
-//     "number": "39-23-6423122",
-//     "id": 4
-//   }
-// ]
 
 app.get('/api/persons', (req, res) => {
   Person.find({}).then(persons=>{
@@ -97,30 +75,18 @@ app.get('/api/persons/:id',(req,res,next)=>{
 
 app.post('/api/persons',(req,res,next)=>{
   const person=req.body;
-  if(!person){
-    res.status(404).json({error:'content missing'}).end()
-  }else if(person&&(!person.name||!person.number)){
-    if(!person.name){
-      res.status(404).json({error:` name missing`}).end()
-    }else if(!person.number){
-      res.status(404).json({error:` number missing`}).end()
-    }
-  }
-  // else if(persons.find(p=>p.name===person.name)){/
-  //   res.status(404).json({error:'name must be unique'}).end();
-  // }
-
-  else{
     const p=new Person({...person})
     p.save().then(savedNote=>res.json(savedNote.toJSON()))
     .catch(err=>next(err))
-  }
 })
 
 const errorHandler=(err,req,rep,next)=>{
+  console.log('--------------------------s')
   console.log(err.message)
   if(err.name==='CastError'&& err.kind==='ObjectId'){
     return rep.status(400).send({error:'malformatted id'})
+  }else if(err.name==='ValidationError'){
+    return rep.status(400).json({error:err.message})
   }
   next(err)
 }

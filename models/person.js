@@ -1,4 +1,5 @@
 const mongoose=require('mongoose')
+var uniqueValidator=require('mongoose-unique-validator')
 mongoose.set('useFindAndModify', false)
 const url=process.env.MONGODB_URI
 console.log('connecting to', url)
@@ -10,8 +11,8 @@ mongoose.connect(url,{useNewUrlParser:true})
     console.log('error connecting to mongodb',err.message)
 })
 const personSchema= new mongoose.Schema({
-    name:String,
-    number:String
+    name:{type:String,required:true,minlength:3,unique:true},
+    number:{type:String,required:true,minlength:8}
 })
 
 personSchema.set('toJSON',{
@@ -21,4 +22,6 @@ personSchema.set('toJSON',{
         delete ret.__V
     }
 })
+
+personSchema.plugin(uniqueValidator)
 module.exports=mongoose.model('Person',personSchema)
